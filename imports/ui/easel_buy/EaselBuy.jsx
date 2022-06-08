@@ -1,15 +1,12 @@
-import React, { Component } from "react";
-import { Spinner, Row, Col, Container } from "reactstrap";
+import React, {Component} from "react";
+import {Spinner, Row, Col, Container} from "reactstrap";
 import axios from "axios";
 import i18n from "meteor/universe:i18n";
 import settings from "../../../settings.json";
-import { FlowRouter } from "meteor/ostrio:flow-router-extra";
+import {FlowRouter} from "meteor/ostrio:flow-router-extra";
 import moment from "moment";
 import _ from "lodash";
-import {
-  FlowRouterMeta,
-  FlowRouterTitle,
-} from "meteor/ostrio:flow-router-meta";
+import {FlowRouterMeta, FlowRouterTitle} from "meteor/ostrio:flow-router-meta";
 
 FlowRouter.route("/", {
   action() {
@@ -91,7 +88,7 @@ export default class EaselBuy extends Component {
     const url = settings.remote.api;
     axios
       .get(
-        // `http://35.188.86.73:2317/Pylons-tech/pylons/pylons/get_recipe_history/${this.props.cookbook_id}/${this.props.recipe_id}`
+        // `${url}/Pylons-tech/pylons/pylons/get_recipe_history/${this.props.cookbook_id}/${this.props.recipe_id}`
         "http://35.188.86.73:2317/Pylons-tech/pylons/pylons/get_recipe_history/cookbookLOUD/recipe_1"
       )
       .then((res) => {
@@ -103,115 +100,78 @@ export default class EaselBuy extends Component {
   };
   handleFetchData = () => {
     const url = settings.remote.api;
-    this.setState({ loading: true });
+    this.setState({loading: true});
     axios
       .get(
         `${url}/pylons/recipe/${this.props.cookbook_id}/${this.props.recipe_id}`
       )
       .then((response) => {
-        console.log("res is");
-        const res = _.cloneDeep(response);
-        const secondCopy = _.cloneDeep(response);
+        let media;
         let coin;
-        this.setState({ loading: false });
-        const selectedRecipe = res.data.Recipe;
-        const coinInputs = selectedRecipe.coinInputs;
         let price;
+        let edition;
+        const tradePercent = 100;
+        const res = _.cloneDeep(response);
+        this.setState({loading: false});
+        const selectedRecipe = _.cloneDeep(res.data.Recipe);
+        const itemOutputs = _.cloneDeep(selectedRecipe.entries.itemOutputs[0]);
+        const strings = _.cloneDeep(itemOutputs.strings);
+        const coinInputs = [...selectedRecipe.coinInputs];
         if (coinInputs.length > 0) {
-          if (coinInputs[0].coins[0].denom == "USD") {
+          const resCoins = coinInputs[0].coins[0];
+          if (resCoins.denom == "USD") {
             price =
-              Math.floor(coinInputs[0].coins[0].amount / 100) +
+              Math.floor(resCoins.amount / 100) +
               "." +
-              (coinInputs[0].coins[0].amount % 100) +
+              (resCoins.amount % 100) +
               " " +
-              coinInputs[0].coins[0].denom;
+              resCoins.denom;
           } else {
             let coins = Meteor.settings.public.coins;
             coin = coins.length
               ? coins.find(
                   (coin) =>
-                    coin.denom.toLowerCase() ===
-                    coinInputs[0].coins[0].denom.toLowerCase()
+                    coin.denom.toLowerCase() === resCoins.denom.toLowerCase()
                 )
               : null;
             if (coin) {
-              price =
-                coinInputs[0].coins[0].amount / coin.fraction +
-                " " +
-                coin.displayName;
+              price = resCoins.amount / coin.fraction + " " + coin.displayName;
             } else {
-              price =
-                coinInputs[0].coins[0].amount +
-                " " +
-                coinInputs[0].coins[0].denom;
+              price = resCoins.amount + " " + resCoins.denom;
             }
           }
         }
-        console.log("coin", coin);
-        const entries = selectedRecipe.entries;
+        const entries = _.cloneDeep(selectedRecipe.entries);
 
-        let img;
         if (entries != null) {
-          const itemoutputs = entries.itemOutputs;
-          if (itemoutputs.length > 0) {
-            let strings = itemoutputs[0].strings;
-            for (let i = 0; i < strings.length; i++) {
-              try {
-                if (
-                  (strings[i].key =
-                    "NFT_URL" && strings[i].value.indexOf("http") >= 0)
-                ) {
-                  img = strings[i].value;
-                  break;
-                }
-              } catch (e) {
-                console.log("strings[i].value", e);
-                break;
-              }
-            }
-          }
+          const mediaUrl = strings.find((val) => val.key === "NFT_URL");
+          media = mediaUrl ? mediaUrl.value : "";
         }
-        const strings = [
-          ...secondCopy.data.Recipe.entries.itemOutputs[0].strings,
-        ];
         const nftType = strings.find(
           (val) => val.key.toLowerCase() === "nft_format"
-        ).value;
-        console.log("strings are", nftType);
-        const dimWidth = entries.itemOutputs[0].longs[1].weightRanges[0].lower;
-        const dimHeight = entries.itemOutputs[0].longs[2].weightRanges[0].lower;
-        const dimentions = this.getNFTDimentions(
-          nftType,
-          secondCopy.data.Recipe.entries.itemOutputs[0]
-        );
-        //   entries.itemOutputs[0].longs[1].weightRanges[0].lower +
-        //   " x " +
-        //   entries.itemOutputs[0].longs[2].weightRanges[0].lower;
-        console.log("dimentions", !!img);
-        this.setState({
-          name: selectedRecipe.name,
-          description: selectedRecipe.description,
-          price,
-          dimWidth,
-          dimHeight,
-          nftType,
-          dimentions,
-          displayName: coin.displayName,
-          createdAt: moment(selectedRecipe.createdAt).format("DD/MM/YYYY"),
-          royalty: entries.itemOutputs[0].tradePercentage * coin.fraction,
-          edition: `${entries.itemOutputs[0].amountMinted} of ${entries.itemOutputs[0].quantity}`,
-          img,
-          id: selectedRecipe.ID,
-          imageLoading: !!img ? false : true,
-        });
+        )?.value;
+
+        const dimentions = this.getNFTDimentions(nftType, itemOutputs);
+        (edition = `${itemOutputs.amountMinted} of ${itemOutputs.quantity}`),
+          this.setState({
+            name: selectedRecipe.name,
+            description: selectedRecipe.description,
+            price,
+            nftType,
+            dimentions,
+            displayName: coin.displayName,
+            royalty: itemOutputs.tradePercentage * tradePercent,
+            edition,
+            media,
+            id: selectedRecipe.ID,
+          });
       })
       .catch((err) => {
-        this.setState({ loading: false });
+        this.setState({loading: false});
         console.log(err);
       });
   };
   getNFTDimentions = (nftType, data) => {
-    console.log("data", data);
     if (
       nftType.toLowerCase() === "image" ||
       nftType.toLowerCase() === "video"
@@ -231,12 +191,9 @@ export default class EaselBuy extends Component {
     } else {
     }
   };
-  // In case IOS will redirect to APP Store if app not installed
-  // In case Android will redirect to Play store if app not installed
-  // In case in Browser will redirect to Play store
+
   handleLoginConfirmed = () => {
-    const { apn, ibi, isi, oflIOS, oflPlay } =
-      Meteor.settings.public.dynamicLink;
+    const {apn, ibi, isi, oflIOS, oflPlay} = Meteor.settings.public.dynamicLink;
     const isMacLike = /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform);
     let ofl = oflPlay;
     if (isMacLike) {
@@ -255,31 +212,30 @@ export default class EaselBuy extends Component {
       showHideComp1,
       showHideComp2,
       showHideComp3,
+      showHideComp4,
       nftType,
-      imageLoading,
-      img,
+      loading,
+      media,
       displayName,
       nftHistory,
     } = this.state;
-    console.log("nftHistory");
-    const getMedia = () => {
-      console.log("imageLoading", nftType, img);
 
-      if (imageLoading || !nftType)
-        return <Spinner type="grow" color="primary" />;
+    const getMedia = () => {
+      if (loading) return <Spinner type="grow" color="primary" />;
+      else if (!nftType) return null;
       else if (nftType.toLowerCase() === "image")
         return (
           <img
             alt="views"
-            src={img}
-            style={{ width: "100%", height: "100%" }}
+            src={media}
+            style={{width: "100%", height: "100%"}}
           />
         );
       else if (nftType.toLowerCase() === "audio")
         return (
           <audio controls>
-            <source src={this.state.img} type="video/mp4" />
-            <source src={this.state.img} type="video/ogg" />
+            <source src={media} type="video/mp4" />
+            <source src={media} type="video/ogg" />
             Your browser does not support the audio element.
           </audio>
         );
@@ -287,7 +243,7 @@ export default class EaselBuy extends Component {
         return (
           <model-viewer
             alt="3D NFT"
-            src={this.state.img}
+            src={media}
             ar
             ar-modes="webxr scene-viewer quick-look"
             environment-image="shared-assets/environments/moon_1k.hdr"
@@ -300,9 +256,9 @@ export default class EaselBuy extends Component {
         );
       else
         return (
-          <video width="100%" height="100%" controls>
-            <source src={this.state.img} type="video/mp4" />
-            <source src={this.state.img} type="video/ogg" />
+          <video width="75%" height="50%" controls>
+            <source src={media} type="video/mp4" />
+            <source src={media} type="video/ogg" />
             Your browser does not support the video tag.
           </video>
         );
@@ -321,8 +277,8 @@ export default class EaselBuy extends Component {
                     <img
                       alt="frame"
                       src="/img/frame.png"
-                      width="445px"
-                      height="989px"
+                      width="100%"
+                      height="100%"
                       className="mob-frame"
                     />
                     {getMedia()}
@@ -343,7 +299,7 @@ export default class EaselBuy extends Component {
                           <img
                             alt="Published"
                             src="/img/check.svg"
-                            style={{ width: "16px", height: "16px" }}
+                            style={{width: "16px", height: "16px"}}
                           />
                         </p>
                       </div>
@@ -352,30 +308,50 @@ export default class EaselBuy extends Component {
                         <img
                           alt="views"
                           src="/img/eye.svg"
-                          style={{ width: "34px", height: "20px" }}
+                          style={{width: "34px", height: "20px"}}
                         />
                         <p>0 views</p>
                       </div>
                     </div>
-                    <div className="description">
-                      <p>{this.state.description}</p>
-                      <a onClick={() => this.hideComponent("showHideComp4")}>
-                        read more
-                      </a>
-                      {/* {showHideComp4 ? (
-                        <img
-                          alt="minimize"
-                          src="/img/minimize.svg"
-                          style={{width: "27px", height: "27px"}}
-                        />
-                      ) : (
-                        <img
-                          alt="expand"
-                          src="/img/expand.svg"
-                          style={{width: "27px", height: "27px"}}
-                        />
-                      )} */}
-                    </div>
+                    {this.state.description?.length > 35 ? (
+                      <>
+                        <div className="description">
+                          {showHideComp4 ? (
+                            <>
+                              <p>{this.state.description}</p>
+                              <a
+                                onClick={() =>
+                                  this.hideComponent("showHideComp4")
+                                }
+                              >
+                                read less
+                              </a>
+                            </>
+                          ) : (
+                            <>
+                              <p>
+                                {this.state.description?.substr(0, 35) +
+                                  ". . ."}
+                              </p>
+                              <a
+                                onClick={() =>
+                                  this.hideComponent("showHideComp4")
+                                }
+                              >
+                                read more
+                              </a>
+                            </>
+                          )}
+                        </div>
+                      </>
+                    ) : (
+                      <div className="description">
+                        <p>{this.state.description}</p>
+                      </div>
+                    )}
+
+                    <div className="description"></div>
+
                     <div className="more-details">
                       <div className="left-side">
                         <ul>
@@ -385,12 +361,12 @@ export default class EaselBuy extends Component {
                               <img
                                 alt="Ownership"
                                 src="/img/trophy.svg"
-                                style={{ width: "40px", height: "40px" }}
+                                style={{width: "40px", height: "40px"}}
                               />
                               <img
                                 alt="line"
                                 src="/img/line.svg"
-                                style={{ width: "100%", height: "24px" }}
+                                style={{width: "100%", height: "24px"}}
                                 className="line"
                               />
                             </div>
@@ -403,13 +379,13 @@ export default class EaselBuy extends Component {
                                 <img
                                   alt="minimize"
                                   src="/img/minimize.svg"
-                                  style={{ width: "27px", height: "27px" }}
+                                  style={{width: "27px", height: "27px"}}
                                 />
                               ) : (
                                 <img
                                   alt="expand"
                                   src="/img/expand.svg"
-                                  style={{ width: "27px", height: "27px" }}
+                                  style={{width: "27px", height: "27px"}}
                                 />
                               )}
                             </button>
@@ -456,12 +432,12 @@ export default class EaselBuy extends Component {
                               <img
                                 alt="NFT Detail"
                                 src="/img/detail.svg"
-                                style={{ width: "40px", height: "40px" }}
+                                style={{width: "40px", height: "40px"}}
                               />
                               <img
                                 alt="line"
                                 src="/img/line.svg"
-                                style={{ width: "100%", height: "24px" }}
+                                style={{width: "100%", height: "24px"}}
                                 className="line"
                               />
                             </div>
@@ -474,13 +450,13 @@ export default class EaselBuy extends Component {
                                 <img
                                   alt="minimize"
                                   src="/img/minimize.svg"
-                                  style={{ width: "27px", height: "27px" }}
+                                  style={{width: "27px", height: "27px"}}
                                 />
                               ) : (
                                 <img
                                   alt="expand"
                                   src="/img/expand.svg"
-                                  style={{ width: "27px", height: "27px" }}
+                                  style={{width: "27px", height: "27px"}}
                                 />
                               )}
                             </button>
@@ -509,12 +485,12 @@ export default class EaselBuy extends Component {
                               <img
                                 alt="History"
                                 src="/img/history.svg"
-                                style={{ width: "40px", height: "40px" }}
+                                style={{width: "40px", height: "40px"}}
                               />
                               <img
                                 alt="line"
                                 src="/img/line.svg"
-                                style={{ width: "100%", height: "24px" }}
+                                style={{width: "100%", height: "24px"}}
                                 className="line"
                               />
                             </div>
@@ -527,13 +503,13 @@ export default class EaselBuy extends Component {
                                 <img
                                   alt="minimize"
                                   src="/img/minimize.svg"
-                                  style={{ width: "27px", height: "27px" }}
+                                  style={{width: "27px", height: "27px"}}
                                 />
                               ) : (
                                 <img
                                   alt="expand"
                                   src="/img/expand.svg"
-                                  style={{ width: "27px", height: "27px" }}
+                                  style={{width: "27px", height: "27px"}}
                                 />
                               )}
                             </button>
@@ -555,13 +531,23 @@ export default class EaselBuy extends Component {
                           </li>
                         </ul>
                       </div>
+                      <div className="right-side">
+                        <div className="likes">
+                          <img
+                            alt="expand"
+                            src="/img/likes.svg"
+                            style={{width: "41px", height: "39px"}}
+                          />
+                          <p>0</p>
+                        </div>
+                      </div>
                     </div>
                     <div className="buy-btn">
                       <button onClick={this.handleLoginConfirmed}>
                         <img
                           alt="bg"
                           src="/img/btnbg.svg"
-                          style={{ width: "100%", height: "100%" }}
+                          style={{width: "100%", height: "100%"}}
                           className="btnbg"
                         />
                         <span className="dot"></span>
@@ -573,7 +559,7 @@ export default class EaselBuy extends Component {
                             <img
                               alt="coin"
                               src="/img/btc.svg"
-                              style={{ width: "30px", height: "29px" }}
+                              style={{width: "30px", height: "29px"}}
                             />
                           </div>
                         </div>
@@ -583,100 +569,6 @@ export default class EaselBuy extends Component {
                 </Col>
               </Row>
             </Container>
-            {/* <Col style={{ marginTop: "20rem" }}>
-              <Col> */}
-            {/* <Row style={{ margin: "auto", justifyContent: "center" }}>
-                  {this.state.imageLoading && (
-                    <Spinner type="grow" color="primary" />
-                  )}
-                  <div
-                    style={{
-                      display: this.state.imageLoading ? "none" : "contents",
-                    }}
-                  >
-                    <img
-                      alt="Easel on Google Play"
-                      src={
-                        this.state.img === ""
-                          ? "/img/buy_icon.png"
-                          : this.state.img
-                      }
-                      onLoad={() =>
-                        this.setState({ ...this.state, imageLoading: false })
-                      }
-                      style={{
-                        width: "auto",
-                        height: "auto",
-                        maxWidth: "100%",
-                        maxHeight: "25%",
-                        minWidth: "80%",
-                      }}
-                    />
-                  </div>
-                </Row> */}
-            {/* <Col
-                  style={{
-                    alignSelf: "center",
-                    marginTop: "20px",
-                    width: "100%",
-                  }}
-                > */}
-            {/* <Row style={{ justifyContent: "center" }}>
-                    <a style={{ fontSize: "1.5em" }}>
-                      <b>{this.state.name}</b>
-                    </a>
-                  </Row> */}
-            {/* <Row style={{ justifyContent: "center" }}>
-                    <a style={{ wordBreak: "break-all" }}>
-                      {this.state.description}
-                    </a>
-                  </Row> */}
-            {/* <Row style={{ justifyContent: "center" }}>
-                    <p style={{ marginTop: "7px", fontWeight: "500" }}>
-                      {this.state.price}
-                    </p>
-                  </Row>
-                </Col>
-              </Col> */}
-            {/* <Row style={{ marginTop: "10px" }}>
-                <a
-                  className="btn btn-primary"
-                  onClick={this.handleLoginConfirmed}
-                  style={{ margin: "auto", width: "120px" }}
-                >
-                  <i className="fas" />
-                  {"    BUY    "}
-                </a>
-              </Row> */}
-            {/* <Row style={{ margin: "auto", marginTop: "25px" }}>
-                <Row
-                  style={{
-                    margin: "auto",
-                    alignSelf: "center",
-                    marginRight: "20px",
-                  }}
-                >
-                  <img
-                    alt="Easel on Google Play"
-                    src="/img/easel.png"
-                    style={{ width: "60px", height: "70px" }}
-                  />
-                </Row>
-                <Row
-                  style={{
-                    margin: "auto",
-                    alignSelf: "center",
-                    marginLeft: "15px",
-                  }}
-                >
-                  <img
-                    alt="Easel on Google Play"
-                    src="/img/wallet.png"
-                    style={{ width: "60px", height: "70px" }}
-                  />
-                </Row> */}
-            {/* </Row> */}
-            {/* </Col> */}
           </div>
         </div>
       );
