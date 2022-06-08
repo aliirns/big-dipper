@@ -171,17 +171,22 @@ export default class EaselBuy extends Component {
             }
           }
         }
-        const strings = secondCopy.data.Recipe.entries.itemOutputs[0].strings;
+        const strings = [
+          ...secondCopy.data.Recipe.entries.itemOutputs[0].strings,
+        ];
         const nftType = strings.find(
           (val) => val.key.toLowerCase() === "nft_format"
         ).value;
         console.log("strings are", nftType);
         const dimWidth = entries.itemOutputs[0].longs[1].weightRanges[0].lower;
         const dimHeight = entries.itemOutputs[0].longs[2].weightRanges[0].lower;
-        const dimentions =
-          entries.itemOutputs[0].longs[1].weightRanges[0].lower +
-          " x " +
-          entries.itemOutputs[0].longs[2].weightRanges[0].lower;
+        const dimentions = this.getNFTDimentions(
+          nftType,
+          secondCopy.data.Recipe.entries.itemOutputs[0]
+        );
+        //   entries.itemOutputs[0].longs[1].weightRanges[0].lower +
+        //   " x " +
+        //   entries.itemOutputs[0].longs[2].weightRanges[0].lower;
         console.log("dimentions", !!img);
         this.setState({
           name: selectedRecipe.name,
@@ -204,6 +209,27 @@ export default class EaselBuy extends Component {
         this.setState({ loading: false });
         console.log(err);
       });
+  };
+  getNFTDimentions = (nftType, data) => {
+    console.log("data", data);
+    if (
+      nftType.toLowerCase() === "image" ||
+      nftType.toLowerCase() === "video"
+    ) {
+      return (
+        data.longs[1].weightRanges[0].lower +
+        " x " +
+        data.longs[2].weightRanges[0].lower
+      );
+    } else if (nftType.toLowerCase() === "audio") {
+      const millisecondsDuration = data.longs[3].weightRanges[0].lower;
+      var minutes = Math.floor(millisecondsDuration / 60000);
+      var seconds = ((millisecondsDuration % 60000) / 1000).toFixed(0);
+      return minutes + ":" + (seconds < 10 ? "0" : "") + seconds + " min";
+    } else if (nftType.toLowerCase() === "3d") {
+      return data.strings.find((val) => val.key.toLowerCase() === "size").value;
+    } else {
+    }
   };
   // In case IOS will redirect to APP Store if app not installed
   // In case Android will redirect to Play store if app not installed
@@ -231,29 +257,22 @@ export default class EaselBuy extends Component {
       showHideComp3,
       nftType,
       imageLoading,
+      img,
       displayName,
       nftHistory,
     } = this.state;
     console.log("nftHistory");
     const getMedia = () => {
-      console.log("imageLoading", nftType);
+      console.log("imageLoading", nftType, img);
 
       if (imageLoading || !nftType)
         return <Spinner type="grow" color="primary" />;
       else if (nftType.toLowerCase() === "image")
         return (
-          <image
-            alt="Easel on Google Play"
-            src={this.state.img === "" ? "/img/buy_icon.png" : this.state.img}
-            onLoad={() => this.setState({ ...this.state, imageLoading: false })}
-            style={{
-              width: "100%",
-              height: "100%",
-              maxWidth: "100%",
-              maxHeight: "100%",
-              minWidth: "80%",
-            }}
-            className="mobin-img"
+          <img
+            alt="views"
+            src={img}
+            style={{ width: "100%", height: "100%" }}
           />
         );
       else if (nftType.toLowerCase() === "audio")
@@ -302,8 +321,8 @@ export default class EaselBuy extends Component {
                     <img
                       alt="frame"
                       src="/img/frame.png"
-                      width="100%"
-                      height="100%"
+                      width="445px"
+                      height="989px"
                       className="mob-frame"
                     />
                     {getMedia()}
@@ -335,7 +354,7 @@ export default class EaselBuy extends Component {
                           src="/img/eye.svg"
                           style={{ width: "34px", height: "20px" }}
                         />
-                        <p>1003 views</p>
+                        <p>0 views</p>
                       </div>
                     </div>
                     <div className="description">
@@ -415,12 +434,7 @@ export default class EaselBuy extends Component {
                                 </div>
                                 <div className="item">
                                   <p>Size</p>
-                                  <p>
-                                    {this.state.dimentions}{" "}
-                                    {this.state.nftType === "Image"
-                                      ? "px JPG"
-                                      : null}
-                                  </p>
+                                  <p>{this.state.dimentions}</p>
                                 </div>
                                 <div className="item">
                                   <p>Creation Date</p>
@@ -541,26 +555,6 @@ export default class EaselBuy extends Component {
                           </li>
                         </ul>
                       </div>
-                      <div className="right-side">
-                        <div className="likes">
-                          <img
-                            alt="expand"
-                            src="/img/likes.svg"
-                            style={{ width: "41px", height: "39px" }}
-                          />
-                          <p>0</p>
-                        </div>
-                        <div className="external-link">
-                          <a href="#">
-                            {" "}
-                            <img
-                              alt="expand"
-                              src="/img/external.svg"
-                              style={{ width: "41px", height: "39px" }}
-                            />{" "}
-                          </a>
-                        </div>
-                      </div>
                     </div>
                     <div className="buy-btn">
                       <button onClick={this.handleLoginConfirmed}>
@@ -574,7 +568,6 @@ export default class EaselBuy extends Component {
                         <div className="value-icon">
                           <div className="values">
                             <p>Buy for {this.state.price}</p>
-                            <span className="usd">(50.81 USD)</span>
                           </div>
                           <div className="icon">
                             <img
