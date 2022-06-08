@@ -1,12 +1,15 @@
-import React, {Component} from "react";
-import {Spinner, Row, Col, Container} from "reactstrap";
+import React, { Component } from "react";
+import { Spinner, Row, Col, Container } from "reactstrap";
 import axios from "axios";
 import i18n from "meteor/universe:i18n";
 import settings from "../../../settings.json";
-import {FlowRouter} from "meteor/ostrio:flow-router-extra";
+import { FlowRouter } from "meteor/ostrio:flow-router-extra";
 import moment from "moment";
 import _ from "lodash";
-import {FlowRouterMeta, FlowRouterTitle} from "meteor/ostrio:flow-router-meta";
+import {
+  FlowRouterMeta,
+  FlowRouterTitle,
+} from "meteor/ostrio:flow-router-meta";
 
 FlowRouter.route("/", {
   action() {
@@ -88,8 +91,7 @@ export default class EaselBuy extends Component {
     const url = settings.remote.api;
     axios
       .get(
-        // `${url}/Pylons-tech/pylons/pylons/get_recipe_history/${this.props.cookbook_id}/${this.props.recipe_id}`
-        "http://35.188.86.73:2317/Pylons-tech/pylons/pylons/get_recipe_history/cookbookLOUD/recipe_1"
+        `${url}/Pylons-tech/pylons/pylons/get_recipe_history/${this.props.cookbook_id}/${this.props.recipe_id}`
       )
       .then((res) => {
         console.log("res.data.History", res.data.History);
@@ -100,7 +102,7 @@ export default class EaselBuy extends Component {
   };
   handleFetchData = () => {
     const url = settings.remote.api;
-    this.setState({loading: true});
+    this.setState({ loading: true });
     axios
       .get(
         `${url}/pylons/recipe/${this.props.cookbook_id}/${this.props.recipe_id}`
@@ -112,7 +114,7 @@ export default class EaselBuy extends Component {
         let edition;
         const tradePercent = 100;
         const res = _.cloneDeep(response);
-        this.setState({loading: false});
+        this.setState({ loading: false });
         const selectedRecipe = _.cloneDeep(res.data.Recipe);
         const itemOutputs = _.cloneDeep(selectedRecipe.entries.itemOutputs[0]);
         const strings = _.cloneDeep(itemOutputs.strings);
@@ -167,7 +169,7 @@ export default class EaselBuy extends Component {
           });
       })
       .catch((err) => {
-        this.setState({loading: false});
+        this.setState({ loading: false });
         console.log(err);
       });
   };
@@ -193,7 +195,8 @@ export default class EaselBuy extends Component {
   };
 
   handleLoginConfirmed = () => {
-    const {apn, ibi, isi, oflIOS, oflPlay} = Meteor.settings.public.dynamicLink;
+    const { apn, ibi, isi, oflIOS, oflPlay } =
+      Meteor.settings.public.dynamicLink;
     const isMacLike = /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform);
     let ofl = oflPlay;
     if (isMacLike) {
@@ -228,7 +231,7 @@ export default class EaselBuy extends Component {
           <img
             alt="views"
             src={media}
-            style={{width: "100%", height: "100%"}}
+            style={{ width: "100%", height: "100%" }}
           />
         );
       else if (nftType.toLowerCase() === "audio")
@@ -299,7 +302,7 @@ export default class EaselBuy extends Component {
                           <img
                             alt="Published"
                             src="/img/check.svg"
-                            style={{width: "16px", height: "16px"}}
+                            style={{ width: "16px", height: "16px" }}
                           />
                         </p>
                       </div>
@@ -308,7 +311,7 @@ export default class EaselBuy extends Component {
                         <img
                           alt="views"
                           src="/img/eye.svg"
-                          style={{width: "34px", height: "20px"}}
+                          style={{ width: "34px", height: "20px" }}
                         />
                         <p>0 views</p>
                       </div>
@@ -361,12 +364,12 @@ export default class EaselBuy extends Component {
                               <img
                                 alt="Ownership"
                                 src="/img/trophy.svg"
-                                style={{width: "40px", height: "40px"}}
+                                style={{ width: "40px", height: "40px" }}
                               />
                               <img
                                 alt="line"
                                 src="/img/line.svg"
-                                style={{width: "100%", height: "24px"}}
+                                style={{ width: "100%", height: "24px" }}
                                 className="line"
                               />
                             </div>
@@ -379,13 +382,13 @@ export default class EaselBuy extends Component {
                                 <img
                                   alt="minimize"
                                   src="/img/minimize.svg"
-                                  style={{width: "27px", height: "27px"}}
+                                  style={{ width: "27px", height: "27px" }}
                                 />
                               ) : (
                                 <img
                                   alt="expand"
                                   src="/img/expand.svg"
-                                  style={{width: "27px", height: "27px"}}
+                                  style={{ width: "27px", height: "27px" }}
                                 />
                               )}
                             </button>
@@ -432,12 +435,12 @@ export default class EaselBuy extends Component {
                               <img
                                 alt="NFT Detail"
                                 src="/img/detail.svg"
-                                style={{width: "40px", height: "40px"}}
+                                style={{ width: "40px", height: "40px" }}
                               />
                               <img
                                 alt="line"
                                 src="/img/line.svg"
-                                style={{width: "100%", height: "24px"}}
+                                style={{ width: "100%", height: "24px" }}
                                 className="line"
                               />
                             </div>
@@ -450,13 +453,13 @@ export default class EaselBuy extends Component {
                                 <img
                                   alt="minimize"
                                   src="/img/minimize.svg"
-                                  style={{width: "27px", height: "27px"}}
+                                  style={{ width: "27px", height: "27px" }}
                                 />
                               ) : (
                                 <img
                                   alt="expand"
                                   src="/img/expand.svg"
-                                  style={{width: "27px", height: "27px"}}
+                                  style={{ width: "27px", height: "27px" }}
                                 />
                               )}
                             </button>
@@ -485,12 +488,12 @@ export default class EaselBuy extends Component {
                               <img
                                 alt="History"
                                 src="/img/history.svg"
-                                style={{width: "40px", height: "40px"}}
+                                style={{ width: "40px", height: "40px" }}
                               />
                               <img
                                 alt="line"
                                 src="/img/line.svg"
-                                style={{width: "100%", height: "24px"}}
+                                style={{ width: "100%", height: "24px" }}
                                 className="line"
                               />
                             </div>
@@ -503,13 +506,13 @@ export default class EaselBuy extends Component {
                                 <img
                                   alt="minimize"
                                   src="/img/minimize.svg"
-                                  style={{width: "27px", height: "27px"}}
+                                  style={{ width: "27px", height: "27px" }}
                                 />
                               ) : (
                                 <img
                                   alt="expand"
                                   src="/img/expand.svg"
-                                  style={{width: "27px", height: "27px"}}
+                                  style={{ width: "27px", height: "27px" }}
                                 />
                               )}
                             </button>
@@ -536,7 +539,7 @@ export default class EaselBuy extends Component {
                           <img
                             alt="expand"
                             src="/img/likes.svg"
-                            style={{width: "41px", height: "39px"}}
+                            style={{ width: "41px", height: "39px" }}
                           />
                           <p>0</p>
                         </div>
@@ -547,7 +550,7 @@ export default class EaselBuy extends Component {
                         <img
                           alt="bg"
                           src="/img/btnbg.svg"
-                          style={{width: "100%", height: "100%"}}
+                          style={{ width: "100%", height: "100%" }}
                           className="btnbg"
                         />
                         <span className="dot"></span>
@@ -559,7 +562,7 @@ export default class EaselBuy extends Component {
                             <img
                               alt="coin"
                               src="/img/btc.svg"
-                              style={{width: "30px", height: "29px"}}
+                              style={{ width: "30px", height: "29px" }}
                             />
                           </div>
                         </div>
