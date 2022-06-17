@@ -39,3 +39,9 @@ import '../../api/status/server/publications.js';
 import '../../api/accounts/server/methods.js';
 
 import '../../api/coin-stats/server/methods.js';
+
+import '../../api/listings/server/methods.js';
+import '../../api/listings/server/publications.js';
+
+import '../../api/sales/server/methods.js';
+import '../../api/sales/server/publications.js';
