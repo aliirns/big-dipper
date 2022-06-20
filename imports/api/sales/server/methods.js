@@ -55,7 +55,7 @@ if (Meteor.isServer) {
 
             }
             catch (e) {
-                
+                console.log("upsertSales error: ", e)
             }  
         },
         'Sales.getSales': async function(limit, offset){
@@ -274,7 +274,7 @@ function getUserNameInfo(address){
         result = JSON.parse(response.content);
     }
     catch(e){
-
+        console.log("error getting userNameInfo: ", e)
     }
     return result
 }

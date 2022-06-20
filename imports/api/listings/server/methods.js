@@ -43,7 +43,7 @@ Meteor.methods({
             
         }
         catch (e) {
-            
+            console.log("upserListing error: ", e)
         }  
     },
     'Listings.getListings': async function(limit, offset){
@@ -193,7 +193,7 @@ function getUserNameInfo(address){
         result = JSON.parse(response.content);
     }
     catch(e){
-
+        console.log("error getting userNameInfo: ", e)
     }
     return result
 }
