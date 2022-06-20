@@ -37,7 +37,7 @@ Meteor.methods({
                 }
 
                 // inserting the extracted information in sales collection
-                Listings.upsert({'txhash': txns[i].txhash},{$set: listing})
+                Listings.upsert({'txhash': txns[i]?.txhash},{$set: listing})
 
             }
             
