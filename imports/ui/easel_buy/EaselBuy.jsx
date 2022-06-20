@@ -112,6 +112,7 @@ export default class EaselBuy extends Component {
         let coin;
         let price;
         let edition;
+        let denom;
         const tradePercent = 100;
         const res = _.cloneDeep(response);
         this.setState({ loading: false });
@@ -121,6 +122,7 @@ export default class EaselBuy extends Component {
         const coinInputs = [...selectedRecipe.coinInputs];
         if (coinInputs.length > 0) {
           const resCoins = coinInputs[0].coins[0];
+          denom = resCoins.denom;
           if (resCoins.denom == "USD") {
             price =
               Math.floor(resCoins.amount / 100) +
@@ -137,7 +139,7 @@ export default class EaselBuy extends Component {
                 )
               : null;
             if (coin) {
-              price = resCoins.amount / coin.fraction + " " + coin.displayName;
+              price = resCoins.amount / coin.fraction + " " + coin?.displayName;
             } else {
               price = resCoins.amount + " " + resCoins.denom;
             }
@@ -159,9 +161,10 @@ export default class EaselBuy extends Component {
             name: selectedRecipe.name,
             description: selectedRecipe.description,
             price,
+            denom,
             nftType,
             dimentions,
-            displayName: coin.displayName,
+            displayName: coin?.displayName,
             royalty: itemOutputs.tradePercentage * tradePercent,
             edition,
             media,
@@ -221,8 +224,36 @@ export default class EaselBuy extends Component {
       media,
       displayName,
       nftHistory,
+      denom,
     } = this.state;
 
+    const getCurrencySymbol = () => {
+      switch (denom?.toLowerCase()) {
+        case "uatom":
+          return "/img/uatom.svg";
+        case "ustripeusd":
+          return "/img/ustripeusd.svg";
+        case "upylons":
+        case "upylon":
+          return "/img/pylon_logo.svg";
+
+        case "urun":
+          return "/img/urun.svg";
+
+        case "eeur":
+          return "/img/eeur.svg";
+
+        case "uusd":
+        case "ubedrock":
+        case "umuon":
+        case "ujunox":
+        case "ujunox":
+        case "weth-wei":
+          return "";
+        default:
+          return "";
+      }
+    };
     const getMedia = () => {
       if (loading) return <Spinner type="grow" color="primary" />;
       else if (!nftType) return null;
@@ -559,11 +590,13 @@ export default class EaselBuy extends Component {
                             <p>Buy for {this.state.price}</p>
                           </div>
                           <div className="icon">
-                            <img
-                              alt="coin"
-                              src="/img/btc.svg"
-                              style={{ width: "30px", height: "29px" }}
-                            />
+                            {getCurrencySymbol() ? (
+                              <img
+                                alt="coin"
+                                src={getCurrencySymbol()}
+                                style={{ width: "30px", height: "29px" }}
+                              />
+                            ) : null}
                           </div>
                         </div>
                       </button>
