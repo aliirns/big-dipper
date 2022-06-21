@@ -60,7 +60,7 @@ updateTransactions = () => {
 }
 
 upsertSales = () => {
-    Meteor.call('Sales.upsertSales', (error, result) => {
+    Meteor.call('Analytics.upsertSales', (error, result) => {
         if (error) {
             console.log("Upsert Sales Failed: %o", error);
         } else {
@@ -70,7 +70,7 @@ upsertSales = () => {
 }
 
 upsertListings = () => {
-    Meteor.call('Listings.upsertListings', (error, result) => {
+    Meteor.call('Analytics.upsertListings', (error, result) => {
         if (error) {
             console.log("Upsert Listing Failed: %o", error);
         } else {
