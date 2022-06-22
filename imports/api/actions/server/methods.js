@@ -1,109 +1,349 @@
 import {Meteor} from "meteor/meteor";
 import {Actions} from "../actions.js";
 
-Meteor.methods({
+// Global API configuration
+var Api = new Restivus({
+  useDefaultAuth: true,
+  prettyJson: true
+})
 
-  //to like a specific nft, by a specific user
-  "Actions.likeNFT": function (nftId, liker) {
-    this.unblock();
+Api.addRoute('ping', {authRequired: false}, {
 
-    var action = {
-      nftId: nftId,
-      actionType: "Like",
-      from: liker
+  get: function () {
+
+    return {
+      Code: 200,
+      Message: "Api server is up and running!",
+      Data: ""
     }
-
-    /*
-    upsert a like action, so that multiple likes 
-    on same nft and from same user are disallowed
-    */
-    return Actions.upsert(action, {$set: action})
-  },
-
-  //to view a specific nft, by a specific user
-  "Actions.viewNFT": function (nftId, viewer) {
-    this.unblock();
-
-    var action = {
-      nftId: nftId,
-      actionType: "View",
-      from: viewer
-    }
-
-    /*
-    upsert a view action, so that the insertion of multiple
-    views on same nft and from same user is disallowed
-    */
-    return Actions.upsert(action, {$set: action})
-  },
-
-  //to unlike an nft, already liked by a specific user
-  "Actions.unLikeNFT": function (nftId, unliker) {
-    this.unblock();
-
-    //check if the user has already liked the specified nft
-    var action = Actions.findOne({
-      nftId: nftId, 
-      actionType: "Like", 
-      from: unliker
-    })
-
-    //if not, inform the caller
-    if (action == null){
-      return "can't unlike"
-    }
-
-    //if yes, remove the like
-    return Actions.remove({
-      _id: action._id
-    });
 
   },
 
-  //to get likes and view on an NFT
-  "Actions.getLikesAndViewsOnNFT": function (nftId) {
-    this.unblock();
+});
 
-    //get likes on this nft
-    var likes = Actions.find({
-      nftId: nftId, 
-      actionType: "Like"
-    }).count()
+Api.addRoute('actions/views/:cookbookId/:recipeId', {authRequired: false}, {
 
-    //get views on this nft
-    var views = Actions.find({
-      nftId: nftId,
-      actionType: "View"
-    }).count()
+  //get the views on a specific nft
+  get: function () {
 
-    //prepare stats
-    var stats = {
-      likes: likes,
-      views: views
+    if ( !Valid(this.urlParams.cookbookId) || !Valid(this.urlParams.recipeId) ){
+      return {
+        Code: 400,
+        Message: "invalid request",
+        Data: null
+      }
     }
 
-    //return stats
-    return stats
+    var result = GetViews(this.urlParams.cookbookId, this.urlParams.recipeId)
+
+    return {
+      Code: 200,
+      Message: "Successful",
+      Data: {totalViews: result}
+    }
+
   },
 
-  //to check if a certain user has liked a specific nft or not
-  "Actions.isLiked": function (nftId, liker) {
-    this.unblock();
+  //view a specific nft
+  post: function () {
 
-    //check if the specified user has liked the specified nft
-    var result =  Actions.findOne({
-      nftId: nftId, 
-      actionType: "Like", 
-      from: liker
-    })
-
-    //if a like is found, return true
-    if (result != null){
-      return true
+    if ( !Valid(this.urlParams.cookbookId) || !Valid(this.urlParams.recipeId) || !Valid(this.bodyParams.userId) ){
+      return {
+        Code: 400,
+        Message: "invalid request",
+        Data: null
+      }
     }
 
-    //else return false
-    return false
+    var result = ViewNFT(this.urlParams.cookbookId, this.urlParams.recipeId, this.bodyParams.userId)
+
+    return {
+      Code: 200,
+      Message: "Successful",
+      Data: result
+    }
+
   }
 
 });
+
+Api.addRoute('actions/likes/:cookbookId/:recipeId', {authRequired: false}, {
+
+  //get the likes on a specific nft
+  get: function () {
+
+    if ( !Valid(this.urlParams.cookbookId) || !Valid(this.urlParams.recipeId) ){
+      return {
+        Code: 400,
+        Message: "invalid request",
+        Data: null
+      }
+    }
+
+    var result = GetLikes(this.urlParams.cookbookId, this.urlParams.recipeId)
+
+    return {
+      Code: 200,
+      Message: "Successful",
+      Data: {totalLikes: result}
+    }
+
+  },
+
+  //like a specific nft
+  post: function () {
+
+    if ( !Valid(this.urlParams.cookbookId) || !Valid(this.urlParams.recipeId) || !Valid(this.bodyParams.userId) ){
+      return {
+        Code: 400,
+        Message: "invalid request",
+        Data: null
+      }
+    }
+
+    var result = ToggleLike(this.urlParams.cookbookId, this.urlParams.recipeId, this.bodyParams.userId)
+
+    return {
+      Code: 200,
+      Message: "Successful",
+      Data: result
+    }
+
+  }
+
+});
+
+Api.addRoute('actions/likes/:userId/:cookbookId/:recipeId', {authRequired: false}, {
+
+  //check if the specified user has liked the specified nft or not
+  get: function () {
+
+    if ( !Valid(this.urlParams.cookbookId) || !Valid(this.urlParams.recipeId) || !Valid(this.urlParams.userId) ){
+      return {
+        Code: 400,
+        Message: "invalid request",
+        Data: null
+      }
+    }
+
+    var result = GetLikeStatus(this.urlParams.cookbookId, this.urlParams.recipeId, this.urlParams.userId)
+
+    return {
+      Code: 200,
+      Message: "Successful",
+      Data: result
+    }
+
+  },
+});
+
+Meteor.methods({
+
+  //to like a specific nft, by a specific user
+  "Actions.likeNft": function (cookbookId, recipeId, userId) {
+    this.unblock();
+
+    if ( !Valid(cookbookId) || !Valid(recipeId) || !Valid(userId) ){
+      return {
+        Code: 400,
+        Message: "invalid request",
+        Data: null
+      }
+    }
+    var result = ToggleLike(cookbookId, recipeId, userId)
+    return {
+        Code: 200,
+        Message: "Successful",
+        Data: result
+    }
+    
+  },
+
+  //to view a specific nft, by a specific user
+  "Actions.viewNft": function (cookbookId, recipeId, userId) {
+    this.unblock();
+
+    if ( !Valid(cookbookId) || !Valid(recipeId) || !Valid(userId) ){
+      return {
+        Code: 400,
+        Message: "invalid request",
+        Data: null
+      }
+    }
+    var result = ViewNFT(cookbookId, recipeId, userId) 
+    return {
+      Code: 200,
+      Message: "Successful",
+      Data: result
+    }   
+  },
+
+  //to get likes and view on an NFT
+  "Actions.getLikes": function (cookbookId, recipeId) {
+    this.unblock();
+
+    if ( !Valid(cookbookId) || !Valid(recipeId) ){
+      return {
+        Code: 400,
+        Message: "invalid request",
+        Data: null
+      }
+    }
+    //get likes on this nft
+    var likes = GetLikes(cookbookId, recipeId)
+    return {
+      Code: 200,
+      Message: "Successful",
+      Data: {
+        totalLikes: likes
+      }
+    }  
+  },
+  "Actions.getViews": function (cookbookId, recipeId) {
+    this.unblock();
+
+    if ( !Valid(cookbookId) || !Valid(recipeId) ){
+      return {
+        Code: 400,
+        Message: "invalid request",
+        Data: null
+      }
+    }
+    //get views on this nft
+    var views = GetViews(cookbookId, recipeId)
+    return {
+      Code: 200,
+      Message: "Successful",
+      Data: {
+        totalViews: views
+      }
+    }  
+  },
+
+  //to check if a certain user has liked a specific nft or not
+  "Actions.getLikeStatus": function (cookbookId, recipeId, userId) {
+    this.unblock();
+
+    if ( !Valid(cookbookId) || !Valid(recipeId) || !Valid(userId) ){
+      return {
+        Code: 400,
+        Message: "invalid request",
+        Data: null
+      }
+    }
+    //get like status for this user
+    var result = GetLikeStatus(cookbookId, recipeId, userId)
+    return {
+      Code: 200,
+      Message: "Successful",
+      Data: result
+    } 
+  }
+
+});
+
+function ToggleLike(cookbookId, recipeId, userId) {
+
+  var action = {
+    cookbookId: cookbookId,
+    recipeId: recipeId,
+    actionType: "Like",
+    from: userId
+  }
+
+  //check if the specified user has liked the specified nft
+  var result =  Actions.findOne(action)
+  var liked = false;
+
+  // if user has not already liked the same nft
+  if (result == null) {
+    // add user's like
+    Actions.insert(action)
+    liked = true
+  }
+  else{
+    //otherwise, remove the user's like
+    Actions.remove({
+      _id: result._id
+    });
+  }
+
+  var newLikes = GetLikes(cookbookId, recipeId)
+  return {
+    liked: liked,
+    totalLikes: newLikes
+  }
+
+}
+
+function ViewNFT(cookbookId, recipeId, userId){
+  var action = {
+    cookbookId: cookbookId,
+    recipeId: recipeId,
+    actionType: "View",
+    from: userId
+  }
+
+  /*
+  upsert a view action, so that the insertion of multiple
+  views on same nft and from same user is disallowed
+  */
+  Actions.upsert(action, {$set: action})
+  var views = GetViews(cookbookId, recipeId, userId)
+
+  return {
+    viewed: true,
+    totalViews: views
+  }
+}
+
+function GetLikes(cookbookId, recipeId) {
+  //get likes on the specified nft
+  return Actions.find({
+    cookbookId: cookbookId, 
+    recipeId: recipeId,
+    actionType: "Like"
+  }).count()
+}
+
+function GetViews(cookbookId, recipeId) {
+  //get views on the specified nft
+  return Actions.find({
+    cookbookId: cookbookId, 
+    recipeId: recipeId,
+    actionType: "View"
+  }).count()
+}
+
+function GetLikeStatus(cookbookId, recipeId, userId){
+
+  var likeStatus = false
+   //check if the specified user has liked the specified nft
+   var result =  Actions.findOne({
+    cookbookId: cookbookId, 
+    recipeId: recipeId,
+    actionType: "Like", 
+    from: userId
+  })
+
+  //if a like is found, return true
+  if (result != null){
+    likeStatus = true
+  }
+
+  return {
+    liked: likeStatus
+  }
+
+}
+
+function Valid(parameter) {
+  if (typeof(parameter) != "string"){
+    return false
+  }
+  if (parameter.length == 0){
+    return false
+  }
+  return true
+}
+
