@@ -9,6 +9,9 @@ var Api = new Restivus({
 
 const StatusOk = 200
 const StatusInvalidInput = 400
+const Success = "Success"
+const BadRequest = "Bad Request"
+const ApiServerOkMessage = "Api server is up and running!"
 
 Api.addRoute('ping', {authRequired: false}, {
 
@@ -16,7 +19,7 @@ Api.addRoute('ping', {authRequired: false}, {
 
     return {
       Code: StatusOk,
-      Message: "Api server is up and running!",
+      Message: ApiServerOkMessage,
       Data: ""
     }
 
@@ -32,7 +35,7 @@ Api.addRoute('actions/views/:cookbookId/:recipeId', {authRequired: false}, {
     if ( !Valid(this.urlParams.cookbookId) || !Valid(this.urlParams.recipeId) ){
       return {
         Code: StatusInvalidInput,
-        Message: "invalid request",
+        Message: BadRequest,
         Data: null
       }
     }
@@ -41,7 +44,7 @@ Api.addRoute('actions/views/:cookbookId/:recipeId', {authRequired: false}, {
 
     return {
       Code: StatusOk,
-      Message: "Successful",
+      Message: Success,
       Data: {totalViews: result}
     }
 
@@ -53,7 +56,7 @@ Api.addRoute('actions/views/:cookbookId/:recipeId', {authRequired: false}, {
     if ( !Valid(this.urlParams.cookbookId) || !Valid(this.urlParams.recipeId) || !Valid(this.bodyParams.userId) ){
       return {
         Code: StatusInvalidInput,
-        Message: "invalid request",
+        Message: BadRequest,
         Data: null
       }
     }
@@ -62,7 +65,7 @@ Api.addRoute('actions/views/:cookbookId/:recipeId', {authRequired: false}, {
 
     return {
       Code: StatusOk,
-      Message: "Successful",
+      Message: Success,
       Data: result
     }
 
@@ -78,7 +81,7 @@ Api.addRoute('actions/likes/:cookbookId/:recipeId', {authRequired: false}, {
     if ( !Valid(this.urlParams.cookbookId) || !Valid(this.urlParams.recipeId) ){
       return {
         Code: StatusInvalidInput,
-        Message: "invalid request",
+        Message: BadRequest,
         Data: null
       }
     }
@@ -87,7 +90,7 @@ Api.addRoute('actions/likes/:cookbookId/:recipeId', {authRequired: false}, {
 
     return {
       Code: StatusOk,
-      Message: "Successful",
+      Message: Success,
       Data: {totalLikes: result}
     }
 
@@ -99,7 +102,7 @@ Api.addRoute('actions/likes/:cookbookId/:recipeId', {authRequired: false}, {
     if ( !Valid(this.urlParams.cookbookId) || !Valid(this.urlParams.recipeId) || !Valid(this.bodyParams.userId) ){
       return {
         Code: StatusInvalidInput,
-        Message: "invalid request",
+        Message: BadRequest,
         Data: null
       }
     }
@@ -108,7 +111,7 @@ Api.addRoute('actions/likes/:cookbookId/:recipeId', {authRequired: false}, {
 
     return {
       Code: StatusOk,
-      Message: "Successful",
+      Message: Success,
       Data: result
     }
 
@@ -124,7 +127,7 @@ Api.addRoute('actions/likes/:userId/:cookbookId/:recipeId', {authRequired: false
     if ( !Valid(this.urlParams.cookbookId) || !Valid(this.urlParams.recipeId) || !Valid(this.urlParams.userId) ){
       return {
         Code: StatusInvalidInput,
-        Message: "invalid request",
+        Message: BadRequest,
         Data: null
       }
     }
@@ -133,7 +136,7 @@ Api.addRoute('actions/likes/:userId/:cookbookId/:recipeId', {authRequired: false
 
     return {
       Code: StatusOk,
-      Message: "Successful",
+      Message: Success,
       Data: result
     }
 
@@ -149,14 +152,14 @@ Meteor.methods({
     if ( !Valid(cookbookId) || !Valid(recipeId) || !Valid(userId) ){
       return {
         Code: StatusInvalidInput,
-        Message: "invalid request",
+        Message: BadRequest,
         Data: null
       }
     }
     var result = ToggleLike(cookbookId, recipeId, userId)
     return {
         Code: StatusOk,
-        Message: "Successful",
+        Message: Success,
         Data: result
     }
     
@@ -169,14 +172,14 @@ Meteor.methods({
     if ( !Valid(cookbookId) || !Valid(recipeId) || !Valid(userId) ){
       return {
         Code: StatusInvalidInput,
-        Message: "invalid request",
+        Message: BadRequest,
         Data: null
       }
     }
     var result = ViewNFT(cookbookId, recipeId, userId) 
     return {
       Code: StatusOk,
-      Message: "Successful",
+      Message: Success,
       Data: result
     }   
   },
@@ -188,7 +191,7 @@ Meteor.methods({
     if ( !Valid(cookbookId) || !Valid(recipeId) ){
       return {
         Code: StatusInvalidInput,
-        Message: "invalid request",
+        Message: BadRequest,
         Data: null
       }
     }
@@ -196,7 +199,7 @@ Meteor.methods({
     var likes = GetLikes(cookbookId, recipeId)
     return {
       Code: StatusOk,
-      Message: "Successful",
+      Message: Success,
       Data: {
         totalLikes: likes
       }
@@ -208,7 +211,7 @@ Meteor.methods({
     if ( !Valid(cookbookId) || !Valid(recipeId) ){
       return {
         Code: StatusInvalidInput,
-        Message: "invalid request",
+        Message: BadRequest,
         Data: null
       }
     }
@@ -216,7 +219,7 @@ Meteor.methods({
     var views = GetViews(cookbookId, recipeId)
     return {
       Code: StatusOk,
-      Message: "Successful",
+      Message: Success,
       Data: {
         totalViews: views
       }
@@ -230,7 +233,7 @@ Meteor.methods({
     if ( !Valid(cookbookId) || !Valid(recipeId) || !Valid(userId) ){
       return {
         Code: StatusInvalidInput,
-        Message: "invalid request",
+        Message: BadRequest,
         Data: null
       }
     }
@@ -238,7 +241,7 @@ Meteor.methods({
     var result = GetLikeStatus(cookbookId, recipeId, userId)
     return {
       Code: StatusOk,
-      Message: "Successful",
+      Message: Success,
       Data: result
     } 
   }
