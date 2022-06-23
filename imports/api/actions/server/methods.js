@@ -12,6 +12,8 @@ const StatusInvalidInput = 400
 const Success = "Success"
 const BadRequest = "Bad Request"
 const ApiServerOkMessage = "Api server is up and running!"
+const ActionTypeLike = "Like"
+const ActionTypeView = "View"
 
 Api.addRoute('ping', {authRequired: false}, {
 
@@ -253,7 +255,7 @@ function ToggleLike(cookbookId, recipeId, userId) {
   var action = {
     cookbookId: cookbookId,
     recipeId: recipeId,
-    actionType: "Like",
+    actionType: ActionTypeLike,
     from: userId
   }
 
@@ -286,7 +288,7 @@ function ViewNFT(cookbookId, recipeId, userId){
   var action = {
     cookbookId: cookbookId,
     recipeId: recipeId,
-    actionType: "View",
+    actionType: ActionTypeView,
     from: userId
   }
 
@@ -308,7 +310,7 @@ function GetLikes(cookbookId, recipeId) {
   return Actions.find({
     cookbookId: cookbookId, 
     recipeId: recipeId,
-    actionType: "Like"
+    actionType: ActionTypeLike
   }).count()
 }
 
@@ -317,7 +319,7 @@ function GetViews(cookbookId, recipeId) {
   return Actions.find({
     cookbookId: cookbookId, 
     recipeId: recipeId,
-    actionType: "View"
+    actionType: ActionTypeView
   }).count()
 }
 
@@ -328,7 +330,7 @@ function GetLikeStatus(cookbookId, recipeId, userId){
    var result =  Actions.findOne({
     cookbookId: cookbookId, 
     recipeId: recipeId,
-    actionType: "Like", 
+    actionType: ActionTypeLike, 
     from: userId
   })
 
