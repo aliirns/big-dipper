@@ -3,6 +3,7 @@ import { Analytics } from '../analytics.js';
 import { Recipes } from '../../recipes/recipes.js';
 import { Transactions } from '../../transactions/transactions.js';
 import {sanitizeUrl} from "@braintree/sanitize-url";
+import { isoFormat } from 'd3';
 
 if (Meteor.isServer){
 
@@ -58,6 +59,27 @@ if (Meteor.isServer){
             catch (e) {
                 console.log("upsertSales error: ", e)
             }  
+        },
+        'Analytics.getAllRecords': async function(limit, offset){
+
+            //all listings with limit and starting from offset
+            var records = Analytics.find({
+            },
+            {
+                sort:{'time': -1},
+                limit: limit,
+                skip: offset,
+            }
+            ).fetch();
+
+            for (var i = 0; i < records.length; i++){
+                let from = getUserNameInfo(records[i]?.from)
+                let to = getUserNameInfo(records[i].to)
+                records[i].from = from?.username?.value
+                records[i].to = to?.username?.value
+            }
+
+            return records
         },
         'Analytics.upsertListings': async function(){
             this.unblock();
@@ -117,7 +139,7 @@ if (Meteor.isServer){
             for (var i = 0; i < listings.length; i++){
                 let creatorUsername = getUserNameInfo(listings[i]?.from)
         
-                listings[i]["creatorUsername"] = creatorUsername?.username?.value
+                listings[i].from = creatorUsername?.username?.value
             }
 
             return listings
@@ -148,10 +170,11 @@ if (Meteor.isServer){
                 
             if (creatorOfAllTime[0] != null && creatorOfAllTime[0] != undefined){        
                 var creatorUsername = getUserNameInfo(creatorOfAllTime[0]._id)
-                creatorOfAllTime[0].creatorUsername = creatorUsername?.username?.value
+                creatorOfAllTime[0]["from"] = creatorUsername?.username?.value
+                return creatorOfAllTime[0]
             }
 
-            return creatorOfAllTime
+            return null
 
         },
         'Analytics.getCreatorOfTheDay': async function() {
@@ -194,10 +217,11 @@ if (Meteor.isServer){
 
             if (creatorOfTheDay[0] != null && creatorOfTheDay[0] != undefined){
                 var creatorUsername = getUserNameInfo(creatorOfTheDay[0]._id)
-                creatorOfTheDay[0]["creatorUsername"] = creatorUsername?.username?.value
+                creatorOfTheDay[0]["from"] = creatorUsername?.username?.value
+                return creatorOfTheDay[0]
             }
 
-            return creatorOfTheDay
+            return null
         },
         'Analytics.getSales': async function(limit, offset){
 
@@ -216,10 +240,10 @@ if (Meteor.isServer){
                 let buyerUsername = getUserNameInfo(sales[i]?.to)
                 let sellerUsername = getUserNameInfo(sales[i].from)
 
-                sales[i]["buyerUsername"] = buyerUsername?.username?.value
-                sales[i]["sellerUsername"] = sellerUsername?.username?.value
+                sales[i].to = buyerUsername?.username?.value
+                sales[i].from = sellerUsername?.username?.value
+                
             }
-
             return sales
         },
         'Analytics.getSaleOfAllTime': async function(){
@@ -238,16 +262,19 @@ if (Meteor.isServer){
                 let buyerUsername = getUserNameInfo(sale[0].to)
                 let sellerUsername = getUserNameInfo(sale[0].from)
 
-                sale[0]["buyerUsername"] = buyerUsername?.username?.value
-                sale[0]["sellerUsername"] = sellerUsername?.username?.value
+                sale[0].to = buyerUsername?.username?.value
+                sale[0].from = sellerUsername?.username?.value
+
+                return sale[0]
             }
 
-            return sale
+            return null
 
         },
         'Analytics.getSaleOfTheDay': async function() {
 
             var start = new Date();
+            start.setDate(start.getDate() - 1)
             start.setHours(0,0,0,0);
             var startDate = getFormattedDate(start)
 
@@ -266,17 +293,16 @@ if (Meteor.isServer){
                 limit: 1
             }
             ).fetch()
-
             if (sale[0] != null && sale[0] != undefined){
                 let buyerUsername = getUserNameInfo(sale[0].to)
                 let sellerUsername = getUserNameInfo(sale[0].from)
 
-                sale[0]["buyerUsername"] = buyerUsername?.username?.value
-                sale[0]["sellerUsername"] = sellerUsername?.username?.value
+                sale[0].to = buyerUsername?.username?.value
+                sale[0].from = sellerUsername?.username?.value
+                return sale[0]
             }
-
-            return sale
             
+            return null
         }
     });
 }
@@ -327,10 +353,9 @@ function getNftName(recipe) {
 //fetching username info 
 function getUserNameInfo(address){
     var result;
+    var url = sanitizeUrl(`${Meteor.settings.remote.api}/pylons/account/address/${address}`)
     try{
-        let response = HTTP.get(
-            sanitizeUrl(`${Meteor.settings.remote.api}/pylons/account/address/${address}`)
-        );
+        let response = HTTP.get(url);
         result = JSON.parse(response.content);
     }
     catch(e){
