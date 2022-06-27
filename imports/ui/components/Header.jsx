@@ -27,6 +27,7 @@ import SearchBar from './SearchBar.jsx';
 import i18n from 'meteor/universe:i18n';
 import LedgerModal from '../ledger/LedgerModal.jsx';
 import Account from './Account.jsx';
+import { sanitizeUrl } from '@braintree/sanitize-url';
 
 const T = i18n.createComponent();
 
@@ -76,7 +77,7 @@ export default class Header extends Component {
         const url = Meteor.settings.public.networks
         if (url){
             try{
-                HTTP.get(url, null, (error, result) => {
+                HTTP.get(sanitizeUrl(url), null, (error, result) => {
                     if (result.statusCode == 200){
                         let networks = JSON.parse(result.content);
                         if (networks.length > 0){

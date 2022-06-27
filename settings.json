@@ -1,7 +1,7 @@
 {
     "public":{
         "chainName": "Pylons",
-        "chainId": "pylons",
+        "chainId": "pylons-testnet-3",
         "gtm": "{Add your Google Tag Manager ID here}",
         "slashingWindow": 10000,
         "uptimeWindow": 250,
@@ -13,34 +13,44 @@
         "bech32PrefixValPub": "pylovaloperpub",
         "bech32PrefixConsAddr": "pylovalcons",
         "bech32PrefixConsPub": "pylovalconspub",
-        "bondDenom": "upylon",
+        "bondDenom": "uatom",
         "powerReduction": 1000000,
         "dynamicLink": {
-            "apn": "tech.pylons.wallet.develop",
-            "ibi": "xyz.pylons.wallet.develop",
-            "isi": "1620931213",
-            "oflPlay": "https://play.google.com/store/apps/details?id=tech.pylons.wallet.develop&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1",
-            "oflIOS": "https://apps.apple.com/us/app/pylons/id1620931213"
+            "apn": "tech.pylons.wallet",
+            "ibi": "xyz.pylons.wallet",
+            "isi": "1598732789",
+            "oflPlay": "https://play.google.com/store/apps/details?id=tech.pylons.wallet&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1",
+            "oflIOS": "https://apps.apple.com/us/app/pylons/id1598732789"
         },
         "coins": [
             {
                 "denom": "uatom",
                 "displayName": "ATOM",
                 "fraction": 1000000
-            }, 
+            },
+            {
+                "denom": "ubedrock",
+                "displayName": "UBEDROCK",
+                "fraction": 1000000
+            },
             {
                 "denom": "umuon",
                 "displayName": "MUON",
                 "fraction": 1000000
             },
             {
-                "denom": "upylon",
-                "displayName": "PYLON",
+                "denom": "ustripeusd",
+                "displayName": "STRIPEUSD",
                 "fraction": 1000000
             },
             {
-                "denom": "ustripeusd",
-                "displayName": "STRIPEUSD",
+                "denom": "ujunox",
+                "displayName": "JUNO",
+                "fraction": 1000000
+            },
+            {
+                "denom": "upylons",
+                "displayName": "PYLONS",
                 "fraction": 1000000
             }
         ],
@@ -57,15 +67,13 @@
             "gov": true,
             "distribution": false
         },
-        "coingeckoId": "cosmos",
-        "networks": "https://gist.githubusercontent.com/kwunyeung/8be4598c77c61e497dfc7220a678b3ee/raw/bd-networks.json",
         "banners": false,
-	"baseURL": "https://devwallet.pylons.tech",
+	"baseURL": "http://wallet.pylons.tech",
         "cosmos_sdk": 43
     },
     "remote":{
-        "rpc":"http://35.188.86.73:36657",   
-        "api":"http://35.188.86.73:2317" 
+        "rpc":"https://rpc.pylons.tech",   
+        "api":"https://lcd.pylons.tech" 
     },
     "debug": {
         "startTimer": true
