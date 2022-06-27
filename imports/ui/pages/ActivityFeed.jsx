@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 //import Analytics from './ActivityContainer.js';
-import { Analytics } from '/imports/api/analytics/analytics.js';
+import { Analytics } from "/imports/api/analytics/analytics.js";
 import {
   Container,
   Row,
@@ -11,6 +11,8 @@ import {
   DropdownItem,
   Button,
 } from "reactstrap";
+import ActivityGraph from "./ActivityGraph";
+import { constrainZoomValues } from "plottable/build/src/interactions/panZoomConstraints";
 
 export default class ActivityFeed extends Component {
   constructor(props) {
@@ -19,76 +21,78 @@ export default class ActivityFeed extends Component {
     this.toggleType = this.toggleType.bind(this);
     this.toggleTime = this.toggleTime.bind(this);
     //getting records with limit 1 and offset 1
-    Meteor.call('Analytics.getAllRecords',1, 1, (error, result) => {
+    Meteor.call("Analytics.getAllRecords", 10, 1, (error, result) => {
+      console.log("Analytics.getAllRecords", result);
       if (error) {
-          console.log("get Sales Failed: %o", error);
+        console.log("get Sales Failed: %o", error);
       } else {
-          this.state.ActivityFeedList = result
-          this.setState({})
+        this.setState({ ActivityFeedList: result });
       }
-    })
-    Meteor.call('Analytics.getSaleOfTheDay', (error, result) => {
+    });
+    Meteor.call("Analytics.getSaleOfTheDay", (error, result) => {
+      console.log("Analytics.getSaleOfTheDay", result);
       if (error) {
-          console.log("get Sales Failed: %o", error);
+        console.log("get Sales Failed: %o", error);
       } else {
-        if (result.amount != undefined){
-          this.state.saleOfTheDay = result
-          this.setState({})
-        }  
+        if (result) {
+          this.setState({ saleOfTheDay: result });
+        }
       }
-    })
-    Meteor.call('Analytics.getSaleOfAllTime', (error, result) => {
+    });
+    Meteor.call("Analytics.getSaleOfAllTime", (error, result) => {
+      console.log("Analytics.getSaleOfAllTime", result);
       if (error) {
-          console.log("get Sales Failed: %o", error);
+        console.log("get Sales Failed: %o", error);
       } else {
-          if (result.amount != undefined){
-            this.state.saleOfAllTime = result
-            this.setState({})
-          }  
+        if (result) {
+          console.log("get Sales of all time", result);
+          this.setState({ saleOfAllTime: result });
+        }
       }
-    })
+    });
 
-    Meteor.call('Analytics.getCreatorOfTheDay', (error, result) => {
+    Meteor.call("Analytics.getCreatorOfTheDay", (error, result) => {
+      console.log("Analytics.getCreatorOfTheDay", result);
       if (error) {
-          console.log("get creator Failed: %o", error);
+        console.log("get creator Failed: %o", error);
       } else {
-          if (result.from != undefined){
-            this.state.creatorOfTheDay = result
-            this.setState({})
-          }  
+        if (result) {
+          this.setState({ creatorOfTheDay: result });
+        }
       }
-    })
+    });
 
-    Meteor.call('Analytics.getCreatorOfAllTime', (error, result) => {
+    Meteor.call("Analytics.getCreatorOfAllTime", (error, result) => {
+      console.log("getCreatorOfAllTime", result);
       if (error) {
-          console.log("get creator Failed: %o", error);
+        console.log("get creator Failed: %o", error);
       } else {
-          if (result.from != undefined){
-            this.state.creatorOfAllTime = result
-            this.setState({})
-          }  
+        if (result.from != undefined) {
+          this.state.creatorOfAllTime = result;
+          this.setState({ creatorOfAllTime: result });
+        }
       }
-    })
-    
+    });
+
     this.state = {
       dropdownAmount: false,
       dropdownType: false,
       dropdownTime: false,
       ActivityFeedList: [],
       saleOfTheDay: {
-        amount: 0,
-        coin: "upylon"
+        amount: "",
+        coin: "...",
       },
       saleOfAllTime: {
-        amount: 0,
-        coin: "upylon"
+        amount: "",
+        coin: "...",
       },
       creatorOfTheDay: {
-        from: "..."
+        from: "...",
       },
       creatorOfAllTime: {
-        from: "..."
-      }
+        from: "...",
+      },
     };
   }
   toggleAmount() {
@@ -109,99 +113,67 @@ export default class ActivityFeed extends Component {
     });
   }
 
-  // ActivityFeedList = [
-  //   {
-  //     icon: "img/profile1.png",
-  //     name: "Mona Lisa’s sister #0718",
-  //     amount: "$5290.00",
-  //     type: "Sale",
-  //     from: "	User02718",
-  //     to: "Sarahjohnson",
-  //     time: "10s ago",
-  //   },
-  //   {
-  //     icon: "img/profile2.png",
-  //     name: "Mona Lisa’s sister #0718",
-  //     amount: "$5290.00",
-  //     extra: "$400.54",
-  //     type: "Sale",
-  //     from: "	User02718",
-  //     to: "Sarahjohnson",
-  //     time: "10s ago",
-  //   },
-  //   {
-  //     icon: "img/profile3.png",
-  //     name: "Mona Lisa’s sister #0718",
-  //     amount: "$5290.00",
-  //     extra: "$400.54",
-  //     type: "Sale",
-  //     from: "	User02718",
-  //     to: "Sarahjohnson",
-  //     time: "10s ago",
-  //   },
-  //   {
-  //     icon: "img/profile1.png",
-  //     name: "Mona Lisa’s sister #0718",
-  //     amount: "$5290.00",
-  //     type: "Sale",
-  //     from: "	User02718",
-  //     to: "Sarahjohnson",
-  //     time: "10s ago",
-  //   },
-  //   {
-  //     icon: "img/profile2.png",
-  //     name: "Mona Lisa’s sister #0718",
-  //     amount: "$5290.00",
-  //     type: "Sale",
-  //     from: "	User02718",
-  //     to: "Sarahjohnson",
-  //     time: "10s ago",
-  //   },
-  //   {
-  //     icon: "img/profile3.png",
-  //     name: "Mona Lisa’s sister #0718",
-  //     amount: "$5290.00",
-  //     type: "Sale",
-  //     from: "	User02718",
-  //     to: "Sarahjohnson",
-  //     time: "10s ago",
-  //   },
-  // ];
-
   render() {
+    const { saleOfAllTime, creatorOfTheDay, saleOfTheDay, ActivityFeedList } =
+      this.state;
     return (
       <div id="activityfeed">
         <Container fluid>
           <Row>
             <Col xl={3} lg={6} md={6} sm={6} xs={12}>
-              <div className="item-box box1">
-                <p>Top Sale of the Day</p>
-                <b>{this.state.saleOfTheDay.amount + " " +this.state.saleOfTheDay.coin}</b>
+              <div className="item-box">
+                <div className="top">
+                  <p>Top Sale All Time</p>
+                  <a href="#">
+                    <i className="fa fa-arrow-right"></i>
+                  </a>
+                </div>
+                <b>{saleOfAllTime?.amount + " " + saleOfAllTime?.coin}</b>
               </div>
             </Col>
             <Col xl={3} lg={6} md={6} sm={6} xs={12}>
-              <div className="item-box box2">
-                <p>Top Sale of All Time</p>
-                <b>{this.state.saleOfAllTime.amount+ " " + this.state.saleOfAllTime.coin}</b>
+              <div className="item-box">
+                <div className="top">
+                  <p>Top Creator All Time </p>
+                  <a href="#">
+                    <i className="fa fa-arrow-right"></i>
+                  </a>
+                </div>
+                <b>{this.state?.creatorOfAllTime?.from}</b>
               </div>
             </Col>
             <Col xl={3} lg={6} md={6} sm={6} xs={12}>
-              <div className="item-box box3">
-                <p>Creator of the Day</p>
-                <b>{this.state.creatorOfTheDay.from}</b>
+              <div className="item-box">
+                <div className="top">
+                  <p>Top Sale of the Day </p>
+                  <a href="#">
+                    <i className="fa fa-arrow-right"></i>
+                  </a>
+                </div>
+                <b>{saleOfTheDay.amount + " " + saleOfTheDay?.coin}</b>
               </div>
             </Col>
             <Col xl={3} lg={6} md={6} sm={6} xs={12}>
               {" "}
-              <div className="item-box box4">
-                <p>Creator of All Time</p>
-                <b>{this.state.creatorOfAllTime.from}</b>
+              <div className="item-box">
+                <div className="top">
+                  <p>Creator of the Day</p>
+                  <a href="#">
+                    <i className="fa fa-arrow-right"></i>
+                  </a>
+                </div>
+                <b>{creatorOfTheDay?.from}</b>
               </div>
             </Col>
           </Row>
           <Row>
             <Col xl={12}>
-              <h1>Activity Feed</h1>
+              <ActivityGraph />
+            </Col>
+          </Row>
+          <Row>
+            <Col xl={12}>
+              <h4>Activity Feed</h4>
             </Col>
             <Col xl={12}>
               <div className="table-responsive">
@@ -210,7 +182,8 @@ export default class ActivityFeed extends Component {
                     <tr>
                       <th>Item</th>
                       <th>
-                        <ButtonDropdown
+                        Amount
+                        {/* <ButtonDropdown
                           isOpen={this.state.dropdownAmount}
                           toggle={this.toggleAmount}
                         >
@@ -221,11 +194,11 @@ export default class ActivityFeed extends Component {
                             <Button>$1000-$5000</Button>
                             <Button>{`> $5000`}</Button>
                           </DropdownMenu>
-                        </ButtonDropdown>
+                        </ButtonDropdown> */}
                       </th>
                       <th>
-                        {" "}
-                        <ButtonDropdown
+                        Type
+                        {/* <ButtonDropdown
                           isOpen={this.state.dropdownType}
                           toggle={this.toggleType}
                         >
@@ -235,13 +208,13 @@ export default class ActivityFeed extends Component {
                             <Button>Transfer</Button>
                             <Button>Listing</Button>
                           </DropdownMenu>
-                        </ButtonDropdown>
+                        </ButtonDropdown> */}
                       </th>
                       <th>From</th>
                       <th>To</th>
                       <th>
-                        {" "}
-                        <ButtonDropdown
+                        Time
+                        {/* <ButtonDropdown
                           isOpen={this.state.dropdownTime}
                           toggle={this.toggleTime}
                         >
@@ -252,12 +225,12 @@ export default class ActivityFeed extends Component {
                             <Button>Last 1 month</Button>
                             <Button>All time</Button>
                           </DropdownMenu>
-                        </ButtonDropdown>
+                        </ButtonDropdown> */}
                       </th>
                     </tr>
                   </thead>
                   <tbody>
-                    {this.state.ActivityFeedList.map((item, index) => (
+                    {ActivityFeedList.map((item, index) => (
                       <tr key={index}>
                         <td>
                           <div className="user-profile">
@@ -281,7 +254,7 @@ export default class ActivityFeed extends Component {
                           <a href="#">{item.from}</a>
                         </td>
                         <td>
-                          <a href="#">{item.to}</a>
+                          <a href="#">{item?.to ? item?.to : "-"}</a>
                         </td>
                         <td>{item.time}</td>
                       </tr>
