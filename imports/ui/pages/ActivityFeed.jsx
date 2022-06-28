@@ -23,14 +23,7 @@ export default class ActivityFeed extends Component {
     this.toggleType = this.toggleType.bind(this);
     this.toggleTime = this.toggleTime.bind(this);
     //getting records with limit 1 and offset 1
-    Meteor.call("Analytics.getAllRecords", 10, 1, (error, result) => {
-      console.log("Analytics.getAllRecords", result);
-      if (error) {
-        console.log("get Sales Failed: %o", error);
-      } else {
-        this.setState({ ActivityFeedList: result });
-      }
-    });
+
     Meteor.call("Analytics.getSaleOfTheDay", (error, result) => {
       console.log("Analytics.getSaleOfTheDay", result);
       if (error) {

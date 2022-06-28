@@ -6,22 +6,28 @@ import Pagination from "react-responsive-pagination";
 function AcitvityTable({}) {
   const [activityFeedList, setActivityFeedList] = useState([]);
   const [loadingTableData, setLoadingTableData] = useState(false);
-  const [currentPage, setCurrentPage] = useState(4);
+  const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
 
-  useEffect(() => {
+  const getTableData = () => {
+    console.log("your page is", currentPage);
     setLoadingTableData(true);
-    Meteor.call("Analytics.getAllRecords", 10, 1, (error, result) => {
+    Meteor.call("Analytics.getAllRecords", 10, currentPage, (error, result) => {
       console.log("Analytics.getAllRecords", result);
       if (error) {
         console.log("get Sales Failed: %o", error);
+        setTotalPages(0);
         setLoadingTableData(false);
       } else {
-        setActivityFeedList(result);
+        setActivityFeedList(result.records);
+        setTotalPages(Math.ceil(result.count / 10));
         setLoadingTableData(false);
       }
     });
-  }, []);
+  };
+  useEffect(() => {
+    getTableData();
+  }, [currentPage]);
   if (loadingTableData) return <Spinner type="grow" color="primary" />;
   return (
     <div>
@@ -115,11 +121,13 @@ function AcitvityTable({}) {
           </tbody>
         </table>
       </div>
-      <Pagination
-        current={currentPage}
-        total={totalPages}
-        onPageChange={setCurrentPage}
-      />
+      <div style={{ marginTop: "20px" }}>
+        <Pagination
+          current={currentPage}
+          total={totalPages}
+          onPageChange={setCurrentPage}
+        />
+      </div>
     </div>
   );
 }
