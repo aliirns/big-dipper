@@ -34,6 +34,7 @@ export default class EaselBuy extends Component {
       price: this.props.price,
       img: this.props.img,
       createdAt: this.props.createdAt,
+      createdBy: "",
       royalty: this.props.royalty,
       id: this.props.id,
       history: this.props.history,
@@ -115,11 +116,12 @@ export default class EaselBuy extends Component {
         let denom;
         const tradePercent = 100;
         const res = _.cloneDeep(response);
+        console.log("new formateed data is", response);
         this.setState({ loading: false });
-        const selectedRecipe = _.cloneDeep(res.data.Recipe);
-        const itemOutputs = _.cloneDeep(selectedRecipe.entries.itemOutputs[0]);
+        const selectedRecipe = _.cloneDeep(res.data.recipe);
+        const itemOutputs = _.cloneDeep(selectedRecipe.entries.item_outputs[0]);
         const strings = _.cloneDeep(itemOutputs.strings);
-        const coinInputs = [...selectedRecipe.coinInputs];
+        const coinInputs = [...selectedRecipe.coin_inputs];
         if (coinInputs.length > 0) {
           const resCoins = coinInputs[0].coins[0];
           denom = resCoins.denom;
@@ -154,10 +156,14 @@ export default class EaselBuy extends Component {
         const nftType = strings.find(
           (val) => val.key.toLowerCase() === "nft_format"
         )?.value;
+        const creator = strings.find(
+          (val) => val.key.toLowerCase() === "creator"
+        )?.value;
 
         const dimentions = this.getNFTDimentions(nftType, itemOutputs);
-        (edition = `${itemOutputs.amountMinted} of ${itemOutputs.quantity}`),
+        (edition = `${itemOutputs.amount_minted} of ${itemOutputs.quantity}`),
           this.setState({
+            createdBy: creator,
             name: selectedRecipe.name,
             description: selectedRecipe.description,
             price,
@@ -165,10 +171,11 @@ export default class EaselBuy extends Component {
             nftType,
             dimentions,
             displayName: coin?.displayName,
-            royalty: itemOutputs.tradePercentage * tradePercent,
+            royalty: itemOutputs.trade_percentage * tradePercent,
             edition,
             media,
-            id: selectedRecipe.ID,
+            createdAt: selectedRecipe.created_at,
+            id: selectedRecipe.id,
           });
       })
       .catch((err) => {
@@ -222,7 +229,9 @@ export default class EaselBuy extends Component {
       nftType,
       loading,
       media,
+      createdBy,
       displayName,
+      createdAt,
       nftHistory,
       denom,
     } = this.state;
@@ -324,12 +333,7 @@ export default class EaselBuy extends Component {
                       <h4>{this.state.name}</h4>
                       <div className="publisher">
                         <p>
-                          Created by{" "}
-                          <span>
-                            {!!(nftHistory && nftHistory.length)
-                              ? nftHistory[0].senderName
-                              : ""}
-                          </span>
+                          Created by <span>{createdBy}</span>
                           <img
                             alt="Published"
                             src="/img/check.svg"
@@ -430,8 +434,8 @@ export default class EaselBuy extends Component {
                                   <p>
                                     {!!(nftHistory && nftHistory.length)
                                       ? nftHistory[nftHistory.length - 1]
-                                          .senderName
-                                      : ""}
+                                          .sender_name
+                                      : createdBy}
                                   </p>
                                 </div>
                                 <div className="item">
@@ -449,11 +453,10 @@ export default class EaselBuy extends Component {
                                 <div className="item">
                                   <p>Creation Date</p>
                                   <p>
-                                    {!!(nftHistory && nftHistory.length)
-                                      ? moment(
-                                          nftHistory[nftHistory.length - 1]
-                                            .createdAt
-                                        ).format("DD/MM/YYYY hh:mm:ss")
+                                    {!!createdAt
+                                      ? moment
+                                          .unix(createdAt)
+                                          .format("DD/MM/YYYY hh:mm:ss")
                                       : ""}
                                   </p>
                                 </div>
@@ -557,7 +560,7 @@ export default class EaselBuy extends Component {
                                           "DD/MM/YYYY hh:mm:ss"
                                         )}
                                       </p>
-                                      <p>{val.senderName}</p>
+                                      <p>{val.sender_name}</p>
                                     </div>
                                   ))}
                               </div>
