@@ -303,6 +303,40 @@ if (Meteor.isServer){
             }
             
             return null
+        },
+        'Analytics.getSalesGraph': async function() {
+
+            var start = new Date();
+            var end = new Date();
+            start.setDate(start.getDate() - 7)
+            end.setDate(end.getDate() - 6)
+
+            var graphData = [];
+
+            for (var i = 0; i <7; i++){
+                
+                start.setDate(start.getDate() + 1)
+                start.setHours(0,0,0,0);
+                var startDate = getFormattedDate(start)
+
+                
+                end.setDate(end.getDate() + 1)
+                end.setHours(0,0,0,0);
+                var endDate = getFormattedDate(end)
+            
+                //sales
+                var sales = Analytics.find({
+                    type: "Sale",
+                    time: { "$gte": startDate, "$lt": endDate }
+                }
+                ).fetch()
+                graphData.push({
+                    date: startDate,
+                    sales: sales?.length
+                })
+            }
+            
+            return graphData
         }
     });
 }
