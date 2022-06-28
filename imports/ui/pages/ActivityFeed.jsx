@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 //import Analytics from './ActivityContainer.js';
 import { Analytics } from "/imports/api/analytics/analytics.js";
+import moment from "moment";
 import {
   Container,
   Row,
@@ -12,6 +13,7 @@ import {
   Button,
 } from "reactstrap";
 import ActivityGraph from "./ActivityGraph";
+import ActivityTable from "./AcitvityTable";
 import { constrainZoomValues } from "plottable/build/src/interactions/panZoomConstraints";
 
 export default class ActivityFeed extends Component {
@@ -174,95 +176,9 @@ export default class ActivityFeed extends Component {
           <Row>
             <Col xl={12}>
               <h4>Activity Feed</h4>
+              <ActivityTable />
             </Col>
-            <Col xl={12}>
-              <div className="table-responsive">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Item</th>
-                      <th>
-                        Amount
-                        {/* <ButtonDropdown
-                          isOpen={this.state.dropdownAmount}
-                          toggle={this.toggleAmount}
-                        >
-                          <DropdownToggle caret>Amount</DropdownToggle>
-                          <DropdownMenu>
-                            <Button>{`< $100`}</Button>
-                            <Button>$100-$1000</Button>
-                            <Button>$1000-$5000</Button>
-                            <Button>{`> $5000`}</Button>
-                          </DropdownMenu>
-                        </ButtonDropdown> */}
-                      </th>
-                      <th>
-                        Type
-                        {/* <ButtonDropdown
-                          isOpen={this.state.dropdownType}
-                          toggle={this.toggleType}
-                        >
-                          <DropdownToggle caret>Type</DropdownToggle>
-                          <DropdownMenu>
-                            <Button>Sale</Button>
-                            <Button>Transfer</Button>
-                            <Button>Listing</Button>
-                          </DropdownMenu>
-                        </ButtonDropdown> */}
-                      </th>
-                      <th>From</th>
-                      <th>To</th>
-                      <th>
-                        Time
-                        {/* <ButtonDropdown
-                          isOpen={this.state.dropdownTime}
-                          toggle={this.toggleTime}
-                        >
-                          <DropdownToggle caret>Time</DropdownToggle>
-                          <DropdownMenu>
-                            <Button>Last 1 day</Button>
-                            <Button>Last 1 week</Button>
-                            <Button>Last 1 month</Button>
-                            <Button>All time</Button>
-                          </DropdownMenu>
-                        </ButtonDropdown> */}
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {ActivityFeedList.map((item, index) => (
-                      <tr key={index}>
-                        <td>
-                          <div className="user-profile">
-                            <img
-                              src={item.itemImg}
-                              height="100"
-                              width="100"
-                              alt="profile"
-                            />
-                            <a href="#">{item.itemName}</a>
-                          </div>
-                        </td>
-                        <td>
-                          <div className="amount">
-                            <>{item.amount}</>
-                            <span>{item.extra}</span>
-                          </div>
-                        </td>
-                        <td>{item.type}</td>
-                        <td>
-                          <a href="#">{item.from}</a>
-                        </td>
-                        <td>
-                          <a href="#">{item?.to ? item?.to : "-"}</a>
-                        </td>
-                        <td>{item.time}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </Col>
+            <Col xl={12}></Col>
           </Row>
         </Container>
       </div>

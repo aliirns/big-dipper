@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { Spinner } from "reactstrap";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -11,6 +12,7 @@ import {
   Filler,
 } from "chart.js";
 import { Line } from "react-chartjs-2";
+import { data } from "jquery";
 
 ChartJS.register(
   CategoryScale,
@@ -30,7 +32,6 @@ const options = {
       grid: {
         display: false,
         drawBorder: false,
-        drawTicks: false,
       },
     },
     y: {
@@ -45,7 +46,6 @@ const options = {
         borderDash: [8, 4],
         color: "#E4E4E4",
         drawBorder: false,
-        drawTicks: false,
       },
     },
   },
@@ -60,8 +60,8 @@ const options = {
   },
 };
 
-const labels = ["5/18", "5/19", "5/20", "5/21", "5/22", "Today"];
-const data = {
+const labels = [];
+const graphInitialData = {
   labels,
   datasets: [
     {
@@ -69,10 +69,7 @@ const data = {
       fill: false,
       fillColor: "#0A004A",
       fillOpacity: 0.1,
-      data: [
-        234, 234, 234, 4234, 3, 234, 3, 42, 344, 23, 423, 42, 342, 4, 234, 23,
-        423, 4, 234,
-      ],
+      data: [],
       borderColor: "#0A004A",
       backgroundColor: "rgba(6, 103, 235,0.1)",
     },
@@ -80,10 +77,40 @@ const data = {
 };
 
 export default ActivityGraph = () => {
+  const [graphData, setGraphData] = useState(graphInitialData);
+  const [loadingGraph, setLoadingGraph] = useState(false);
+  useEffect(() => {
+    setLoadingGraph(true);
+    Meteor.call("Analytics.getSalesGraph", (error, result) => {
+      console.log("Analytics.getSalesGraph", result);
+      if (error) {
+        console.log("get Sales Failed: %o", error);
+        setLoadingGraph(false);
+      } else {
+        const oldGraphData = { ...graphData };
+        oldGraphData.labels = result.map(({ date }, i) => {
+          const dateValues = date.split("-");
+          return i === result.length - 1
+            ? "Today"
+            : `${dateValues[1]}/${dateValues[2]}`;
+        });
+        oldGraphData.datasets[0].data = result.map(({ sales }, i) => {
+          return sales;
+        });
+        console.log("oldGraphData", oldGraphData);
+        setGraphData(oldGraphData);
+        setLoadingGraph(false);
+      }
+    });
+  }, []);
   return (
     <div className="activity-graph">
       <h4># of Sales</h4>
-      <Line options={options} data={data} height="35px" />
+      {!loadingGraph ? (
+        <Line options={options} data={graphData} height="35px" />
+      ) : (
+        <Spinner type="grow" color="primary" />
+      )}
     </div>
   );
 };
