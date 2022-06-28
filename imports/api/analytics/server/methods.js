@@ -79,7 +79,12 @@ if (Meteor.isServer){
                 records[i].to = to?.username?.value
             }
 
-            return records
+            var count = Analytics.find({}).count()
+
+            return {
+                records: records,
+                count: count
+            }
         },
         'Analytics.upsertListings': async function(){
             this.unblock();
