@@ -62,7 +62,7 @@ export default class ActivityFeed extends Component {
       if (error) {
         console.log("get creator Failed: %o", error);
       } else {
-        if (result.from != undefined) {
+        if (result) {
           this.state.creatorOfAllTime = result;
           this.setState({ creatorOfAllTime: result });
         }
