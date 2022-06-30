@@ -34,3 +34,4 @@ check
 ostrio:flow-router-meta
 ostrio:flow-router-extra
 server-render
+nimble:restivus
