@@ -8,22 +8,28 @@ function AcitvityTable({}) {
   const [loadingTableData, setLoadingTableData] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
-
+  const limit = 10;
   const getTableData = () => {
     console.log("your page is", currentPage);
     setLoadingTableData(true);
-    Meteor.call("Analytics.getAllRecords", 10, currentPage, (error, result) => {
-      console.log("Analytics.getAllRecords", result);
-      if (error) {
-        console.log("get Sales Failed: %o", error);
-        setTotalPages(0);
-        setLoadingTableData(false);
-      } else {
-        setActivityFeedList(result.records);
-        setTotalPages(Math.ceil(result.count / 10));
-        setLoadingTableData(false);
+    Meteor.call(
+      "Analytics.getAllRecords",
+      limit,
+      (currentPage - 1) * limit,
+      (error, result) => {
+        console.log("Analytics.getAllRecords", result);
+        if (error) {
+          console.log("get Sales Failed: %o", error);
+          setTotalPages(0);
+          setLoadingTableData(false);
+        } else {
+          console.log("your data count is", result);
+          setActivityFeedList(result.records);
+          setTotalPages(Math.ceil(result.count / 10));
+          setLoadingTableData(false);
+        }
       }
-    });
+    );
   };
   useEffect(() => {
     getTableData();
