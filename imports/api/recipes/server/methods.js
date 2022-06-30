@@ -3,6 +3,7 @@ import { HTTP } from "meteor/http";
 import { Recipes } from "../recipes.js";
 import { Transactions } from "/imports/api/transactions/transactions.js";
 import { Cookbooks } from "/imports/api/cookbooks/cookbooks.js";
+import { sanitizeUrl } from "@braintree/sanitize-url";
 
 Meteor.methods({
   "recipes.getRecipes": function () {
@@ -33,7 +34,7 @@ Meteor.methods({
         }
       }
 
-      let url = API + "/pylons/recipes/";
+      let url = sanitizeUrl(API + "/pylons/recipes/");
       let response = HTTP.get(url);
       let recipes = JSON.parse(response.content).Recipes;
 
