@@ -15,7 +15,7 @@ if (Meteor.isServer){
                 
                 // finding the transactions of sales type
                 var txns = Transactions.find({
-                    'tx_response.raw_log': /EventCreateExecution/,
+                    'tx_response.raw_log': /ExecuteRecipe/,
                     'tx_response.logs.events.type': {$ne: 'burn'}
                 },
                 {
@@ -27,7 +27,7 @@ if (Meteor.isServer){
                 for (var i = 0; i < txns.length; i++){
 
                     //extracting the required fields
-                    var recipeID = txns[i]?.tx?.body?.messages[0]?.recipeID
+                    var recipeID = txns[i]?.tx?.body?.messages[0]?.recipe_id
                     var recipe = Recipes.findOne({ID: recipeID})
                     var nftName = getNftName(recipe)
                     var nftUrl = getNftUrl(recipe)
