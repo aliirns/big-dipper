@@ -119,13 +119,15 @@ export default class EaselBuy extends Component {
         console.log("new formateed data is", response);
         this.setState({ loading: false });
         const selectedRecipe = _.cloneDeep(res.data.recipe);
-        const itemOutputs = _.cloneDeep(selectedRecipe.entries.item_outputs[0]);
-        const strings = _.cloneDeep(itemOutputs.strings);
-        const coinInputs = [...selectedRecipe.coin_inputs];
+        const itemOutputs = _.cloneDeep(
+          selectedRecipe?.entries?.item_outputs[0]
+        );
+        const strings = _.cloneDeep(itemOutputs?.strings);
+        const coinInputs = [...selectedRecipe?.coin_inputs];
         if (coinInputs.length > 0) {
-          const resCoins = coinInputs[0].coins[0];
-          denom = resCoins.denom;
-          if (resCoins.denom == "USD") {
+          const resCoins = coinInputs[0]?.coins[0];
+          denom = resCoins?.denom;
+          if (resCoins?.denom == "USD") {
             price =
               Math.floor(resCoins.amount / 100) +
               "." +
@@ -137,13 +139,14 @@ export default class EaselBuy extends Component {
             coin = coins.length
               ? coins.find(
                   (coin) =>
-                    coin.denom.toLowerCase() === resCoins.denom.toLowerCase()
+                    coin?.denom?.toLowerCase() ===
+                    resCoins?.denom?.toLowerCase()
                 )
               : null;
             if (coin) {
               price = resCoins.amount / coin.fraction + " " + coin?.displayName;
             } else {
-              price = resCoins.amount + " " + resCoins.denom;
+              price = resCoins?.amount + " " + resCoins?.denom;
             }
           }
         }
@@ -233,9 +236,10 @@ export default class EaselBuy extends Component {
       displayName,
       createdAt,
       nftHistory,
+      price,
       denom,
     } = this.state;
-
+    console.log("price is", price);
     const getCurrencySymbol = () => {
       switch (denom?.toLowerCase()) {
         case "uatom":
@@ -267,13 +271,7 @@ export default class EaselBuy extends Component {
       if (loading) return <Spinner type="grow" color="primary" />;
       else if (!nftType) return null;
       else if (nftType.toLowerCase() === "image")
-        return (
-          <img
-            alt="views"
-            src={media}
-            style={{ width: "100%", height: "100%" }}
-          />
-        );
+        return <img alt="views" src={media} className="mobin-img" />;
       else if (nftType.toLowerCase() === "audio")
         return (
           <audio controls>
@@ -590,7 +588,13 @@ export default class EaselBuy extends Component {
                         <span className="dot"></span>
                         <div className="value-icon">
                           <div className="values">
-                            <p>Buy for {this.state.price}</p>
+                            <p>
+                              Buy for{" "}
+                              {price === undefined ||
+                              price === "undefined undefined"
+                                ? "Free"
+                                : price}
+                            </p>
                           </div>
                           <div className="icon">
                             {getCurrencySymbol() ? (
