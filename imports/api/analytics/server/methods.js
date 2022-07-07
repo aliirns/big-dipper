@@ -100,8 +100,9 @@ if (Meteor.isServer){
                 for (i = 0; i < txns.length; i++){
 
                     // extracting the required fields
-                    var recipeID = txns[i]?.tx?.body?.messages[0]?.recipeID
-                    var recipe = Recipes.findOne({ID: recipeID})
+                    var recipeID = txns[i]?.tx?.body?.messages[0]?.id
+                    var cookBookId = txns[i]?.tx?.body?.messages[0]?.cookbook_id
+                    var recipe = Recipes.findOne({ID: recipeID,cookbook_id:cookBookId})
                     var nftName = getNftName(recipe)
                     var nftUrl = getNftUrl(recipe)
                     var coinInvolved = txns[i]?.tx?.body?.messages[0]?.coin_inputs[0]?.coins[0]
