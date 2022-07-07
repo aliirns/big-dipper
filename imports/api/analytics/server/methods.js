@@ -4,6 +4,7 @@ import { Recipes } from '../../recipes/recipes.js';
 import { Transactions } from '../../transactions/transactions.js';
 import {sanitizeUrl} from "@braintree/sanitize-url";
 import { isoFormat } from 'd3';
+import { HTTP } from 'meteor/http';
 
 if (Meteor.isServer){
 
@@ -101,7 +102,7 @@ if (Meteor.isServer){
                     var recipe = Recipes.findOne({ID: recipeID})
                     var nftName = getNftName(recipe)
                     var nftUrl = getNftUrl(recipe)
-                    var coinInvolved = txns[i]?.tx?.body?.messages[0]?.coinInputs[0]?.coins[0]
+                    var coinInvolved = txns[i]?.tx?.body?.messages[0]?.coin_inputs[0]?.coins[0]
                     var creator = txns[i]?.tx?.body?.messages[0]?.creator
 
                     // constructing the listing object
@@ -225,7 +226,7 @@ if (Meteor.isServer){
                 creatorOfTheDay[0]["from"] = creatorUsername?.username?.value
                 return creatorOfTheDay[0]
             }
-
+d
             return null
         },
         'Analytics.getSales': async function(limit, offset){
@@ -367,10 +368,10 @@ function getFormattedDate(date){
 function getNftUrl(recipe) {
 
     var nftUrl = ""
-    var itemOutputs = recipe?.entries?.itemOutputs
-    if (itemOutputs != null && itemOutputs != undefined ){
-        if (itemOutputs[0] != null){
-            var properties = itemOutputs[0].strings
+    var item_outputs = recipe?.entries?.item_outputs
+    if (item_outputs != null && item_outputs != undefined ){
+        if (item_outputs[0] != null){
+            var properties = item_outputs[0].strings
             for (var i = 0; i < properties.length; i++){
                 if (properties[i].key == "NFT_URL"){
                     nftUrl = properties[i].value
