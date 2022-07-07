@@ -6,6 +6,8 @@ import {sanitizeUrl} from "@braintree/sanitize-url";
 import { isoFormat } from 'd3';
 import { HTTP } from 'meteor/http';
 
+
+const SalesAnalyticsDenom = "upylon"
 if (Meteor.isServer){
 
     Meteor.methods({
@@ -256,7 +258,8 @@ d
 
             //sale of all time
             var sale = Analytics.find({
-                type: "Sale"
+                type: "Sale",
+                coin: SalesAnalyticsDenom
             },
             {
                 sort:{'amount': -1, 'time': -1},
@@ -292,6 +295,7 @@ d
             //sale of today
             var sale = Analytics.find({
                 type: "Sale",
+                coin: SalesAnalyticsDenom,
                 time: { "$gte": startDate, "$lt": endDate }
             },
             {
