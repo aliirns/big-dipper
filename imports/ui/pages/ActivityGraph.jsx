@@ -65,7 +65,7 @@ const graphInitialData = {
   labels,
   datasets: [
     {
-      label: "Total Earnings",
+      label: "Total Sales",
       fill: false,
       fillColor: "#0A004A",
       fillOpacity: 0.1,

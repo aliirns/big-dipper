@@ -42,3 +42,6 @@ import "../../api/coin-stats/server/methods.js";
 
 import "../../api/analytics/server/methods.js";
 import "../../api/analytics/server/publications.js";
+
+import "../../api/actions/server/methods.js";
+import "../../api/actions/server/publications.js";
