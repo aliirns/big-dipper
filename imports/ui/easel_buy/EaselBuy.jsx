@@ -116,7 +116,6 @@ export default class EaselBuy extends Component {
         let denom;
         const tradePercent = 100;
         const res = _.cloneDeep(response);
-        console.log("new formateed data is", response);
         this.setState({ loading: false });
         const selectedRecipe = _.cloneDeep(res.data.recipe);
         const itemOutputs = _.cloneDeep(
@@ -239,7 +238,6 @@ export default class EaselBuy extends Component {
       price,
       denom,
     } = this.state;
-    console.log("price is", price);
     const getCurrencySymbol = () => {
       switch (denom?.toLowerCase()) {
         case "uatom":
