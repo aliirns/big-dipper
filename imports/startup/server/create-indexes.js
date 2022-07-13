@@ -30,11 +30,11 @@ Evidences.rawCollection().createIndex({ height: -1 });
 
 Proposals.rawCollection().createIndex({ proposalId: 1 }, { unique: true });
 
-Recipes.rawCollection().createIndex({ ID: "1", NO: -1 }, { unique: true });
+Recipes.rawCollection().createIndex({ ID: 1, NO: -1 }, { unique: true });
 
-Nfts.rawCollection().createIndex({ ID: "1", NO: -1 }, { unique: true });
+Nfts.rawCollection().createIndex({ ID: 1, NO: -1 }, { unique: true });
 
-Cookbooks.rawCollection().createIndex({ ID: "1", NO: -1 }, { unique: true });
+Cookbooks.rawCollection().createIndex({ ID: 1, NO: -1 }, { unique: true });
 
 ValidatorRecords.rawCollection().createIndex(
   { address: 1, height: -1 },
@@ -119,4 +119,4 @@ CoinStats.rawCollection().createIndex(
   { unique: true }
 );
 
-FCMToken.rawCollection().createIndex({ address: "1" }, { unique: true });
+FCMToken.rawCollection().createIndex({ address: 1 }, { unique: true });
